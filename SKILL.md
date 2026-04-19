@@ -20,17 +20,72 @@ Use Glob and Read tools to understand the project:
 
 Collect this information before proceeding.
 
-### Step 2: Analyze each component
+### Step 2: Analyze — DeepWiki-style structured output
 
-For each major directory/component you found, read the key files and write a thorough analysis. Cover:
+Generate the wiki content in **Japanese**. Follow this exact section structure. Each section must be thorough — read actual source files, quote specific code, and explain the *why* not just the *what*.
 
-- **Overview**: Purpose and architecture of the entire project (2-3 paragraphs)
-- **Per-directory analysis**: For each major directory, explain its role, key files, important functions/classes, and how it connects to other parts
-- **Design patterns**: Architecture patterns, security patterns, error handling strategies used
-- **Dependencies & API**: External libraries and their purpose, internal module relationships, public APIs/endpoints
-- **Developer guide**: Setup, build, test, deploy instructions based on actual scripts/configs
+#### § 01 — Overview (プロジェクト概要)
+- プロジェクトの目的・背景 (2-3段落)
+- 技術スタックの一覧 (言語、フレームワーク、インフラ)
+- **システムアーキテクチャ図**: Mermaid記法で全体構成図を生成し `<pre class="mermaid">` で埋め込む。主要コンポーネントとその接続を示す
+- リポジトリのディレクトリ構成と各ディレクトリの役割一覧表
 
-Be thorough. Read actual source files, not just directory listings. Quote specific code when it helps explain concepts.
+#### § 02 — Architecture (アーキテクチャ詳細)
+- **データフロー図**: Mermaid記法でリクエスト/データの流れを図示
+- レイヤー構成 (プレゼンテーション / ビジネスロジック / データアクセス等)
+- コンポーネント間の依存関係
+- 使われているデザインパターン (Factory, Strategy, Observer等) を具体的なコード引用付きで
+
+#### § 03〜§ N — Component Deep Dives (コンポーネント詳細)
+主要ディレクトリ/モジュールごとに1セクション作成。各セクションに含めること:
+- **目的**: このモジュールが何を担当しているか (1-2文)
+- **主要ファイル一覧**: ファイル名と1行説明の表
+- **重要な関数・クラス**: シグネチャとコード引用付きで解説。`<pre>` でコードブロックを表示
+- **データモデル**: 扱うデータ構造やスキーマ。あればMermaid ER図
+- **他モジュールとの関係**: どこから呼ばれ、何に依存しているか
+- **注意点・設計判断**: なぜこの実装になっているかの背景
+
+#### § (N+1) — API Reference (APIリファレンス) ※APIがある場合
+- エンドポイント一覧表 (メソッド / パス / 説明 / 認証)
+- リクエスト/レスポンスのスキーマ
+- 認証・認可の仕組み
+
+#### § (N+2) — Configuration & Environment (設定)
+- 環境変数一覧表 (変数名 / 説明 / デフォルト値)
+- 設定ファイルの構造と各項目の説明
+- デプロイ構成 (CI/CD, Dockerfile等)
+
+#### § (N+3) — Developer Guide (開発ガイド)
+- セットアップ手順 (実際のコマンドをREADMEやスクリプトから引用)
+- ビルド・テスト・デプロイの方法
+- よくあるトラブルシューティング
+
+#### Mermaid図の埋め込み方法
+Mermaid図は以下の形式で埋め込む。CDNからMermaidを読み込むscriptタグをHTMLのheadに追加すること:
+```html
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#E4DFD3',primaryBorderColor:'#0B0B0B',primaryTextColor:'#0B0B0B',lineColor:'#6E6A5E',secondaryColor:'#EEFF57',tertiaryColor:'#ECE8DE'}});</script>
+```
+図は `<pre class="mermaid">` タグで囲む:
+```html
+<pre class="mermaid">
+graph TD
+    A[Client] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[Business Logic]
+    D --> E[(Database)]
+</pre>
+```
+最低でも以下の図を含めること:
+1. **システムアーキテクチャ図** (§ 01)
+2. **データフロー図** (§ 02)
+3. 各コンポーネントの関係図 (§ 02)
+
+#### 品質基準
+- 各セクションは具体的なコード引用を最低2箇所含める
+- 表 (table) を積極的に使う。ファイル一覧、API一覧、設定一覧は必ず表にする
+- 「〜だと思われます」のような推測は避ける。コードを読んで事実を述べる
+- 各セクションの末尾に、そのセクションを深掘りするための質問プロンプトを `.ask-block` で配置する
 
 ### Step 3: Generate the static site
 
@@ -365,11 +420,14 @@ document.querySelectorAll('h2[id]').forEach(s=>obs.observe(s));
 
 ## Important guidelines
 
+- **日本語で生成する。** すべてのセクション、見出し、説明文は日本語。コード引用とコマンドのみ英語のまま。
 - Generate THOROUGH analysis. Read actual source files. Don't just list file names.
-- Each section should have specific code quotes and explanations.
-- Add `<div class="claude-box">` blocks with suggested follow-up prompts after each section.
+- Each section MUST have specific code quotes (minimum 2 per section) inside `<pre>` blocks.
+- Use **tables** aggressively: file listings, API endpoints, env vars, configs → always a table.
+- Add `.ask-block` prompt blocks after each section for follow-up questions.
+- Include **Mermaid diagrams** (minimum 3): architecture, data flow, component relationships.
 - Include a File Tree section at the end with clickable file names.
 - Include a File Reader section at the end.
-- The HTML MUST be self-contained — everything in one file, no external resources.
+- The HTML MUST be self-contained (except for Google Fonts and Mermaid CDN).
 - Do NOT do incremental updates. Always generate the complete HTML from scratch.
-- Add SVG architecture diagrams where they help explain component relationships.
+- Follow the section numbering: § 01, § 02, § 03... using `.sec-head` markup.
