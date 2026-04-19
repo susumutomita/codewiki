@@ -2,15 +2,15 @@
   <br>
   <strong style="font-size:48px">codewiki</strong>
   <br>
-  <em>DeepWiki, but you can talk to it.</em>
+  <em>Democratize AI-assisted code reading.</em>
   <br><br>
   <a href="https://github.com/susumutomita/codewiki/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a href="https://github.com/susumutomita/codewiki"><img src="https://img.shields.io/github/stars/susumutomita/codewiki?style=social" alt="Stars"></a>
 </p>
 
 <p align="center">
-  Any codebase &rarr; interactive wiki with live AI chat.<br>
-  Right-click any code to ask Claude. Full rebuild every run, zero stale docs.
+  A Claude Code skill that encodes senior-level investigation techniques<br>
+  (<code>git log</code>, <code>grep</code>, <code>ctags</code>, <code>gh</code>, dependency graphs) into one command.
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
   <a href="#install">Install</a> &middot;
   <a href="#why">Why</a> &middot;
   <a href="#how-it-works">How it works</a> &middot;
-  <a href="#vs-deepwiki">vs DeepWiki</a>
+  <a href="#the-gap">The gap</a>
 </p>
 
 ---
@@ -108,18 +108,23 @@ No incremental diffs. No stale sections. No ghost references to renamed files. T
 
 > *"AI is not good at incremental doc updates — sections get stale, renames leave ghost references, and context drifts. Full rebuild eliminates all of that."*
 
-## vs DeepWiki
+## The gap, closed <a name="the-gap"></a>
 
-| | DeepWiki | codewiki |
+The difference between a senior and a junior asking AI about a codebase isn't the AI — it's the *investigation technique*. Here's what codewiki gives you for free:
+
+| Question you'd ask AI | Manual (senior technique) | codewiki |
 | --- | --- | --- |
-| AI-generated docs | Yes | Yes |
-| Live AI chat | No | **Yes** |
-| Right-click → ask | No | **Yes** |
-| File browser | No | **Yes** |
-| Update strategy | Unknown | **Full rebuild** |
-| Integration | Standalone web app | **Claude Code skill** |
-| Runs locally | No | **Yes** |
-| Your code stays local | No (cloud) | **Yes** |
+| "What's in this repo?" | `find`, `tree`, skim README | directory map table |
+| "How does this function work?" | `grep`, trace callers, read refs | explanation with code quotes |
+| "Why is it written this way?" | `git log`, `git blame`, read PRs | rationale from git + Issues + PRs |
+| "How does data flow?" | read + whiteboard | Mermaid flowchart, auto-generated |
+| "What's the DB schema?" | find migrations, read models | Mermaid ER diagram |
+| "Who depends on this module?" | `madge`, `grep imports` | dependency graph |
+| "How do I set it up?" | read scripts + trial & error | setup guide from actual scripts |
+| "Where do I look when it breaks?" | `grep catch`, find log points | error flow map (`--debug`) |
+| "Can I ask follow-ups?" | new AI session, paste code | right-click → ask, inline |
+
+*Same answers. Same depth. No senior required.*
 
 ## Works with any stack
 

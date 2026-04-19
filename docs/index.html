@@ -596,7 +596,7 @@
   </div>
   <div class="nav-right">
     <a href="#how">how it works</a>
-    <a href="#vs">vs deepwiki</a>
+    <a href="#vs">the gap</a>
     <a class="pill" href="https://github.com/susumutomita/codewiki" target="_blank" rel="noopener">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.4 7.86 10.93.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.34.95.1-.74.4-1.24.72-1.53-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.29 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.21-1.49 3.18-1.18 3.18-1.18.62 1.59.23 2.76.11 3.05.73.8 1.17 1.83 1.17 3.09 0 4.41-2.69 5.38-5.26 5.66.41.35.78 1.05.78 2.12v3.15c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
       GitHub
@@ -826,24 +826,70 @@
 <section class="wrap versus" id="vs">
   <div class="sec-head">
     <span class="idx">&#xA7; 03</span>
-    <span class="title">VS DEEPWIKI</span>
-    <span>/ comparison</span>
+    <span class="title">THE SKILL GAP, CLOSED</span>
+    <span>/ manual vs codewiki</span>
   </div>
 
+  <p style="font-family:var(--mono);font-size:14px;color:var(--ink-soft);max-width:62ch;margin:18px 0 24px">
+    The difference between a senior and a junior asking AI about a codebase isn't the AI — it's the <span class="hl">investigation technique</span>.
+    codewiki encodes that technique. Here's what changes:
+  </p>
+
   <div class="v-head">
-    <div class="c">Capability</div>
-    <div class="c">DeepWiki</div>
+    <div class="c">question you'd ask AI</div>
+    <div class="c">manual (senior technique)</div>
     <div class="c me">codewiki /</div>
   </div>
 
-  <div class="v-row"><div class="k">AI-generated documentation</div><div class="c"><span class="mark">&#x25CF;</span> yes</div><div class="c me"><span class="mark">&#x25CF;</span> yes</div></div>
-  <div class="v-row"><div class="k">Ask follow-ups in the wiki</div><div class="c"><span class="mark no">&#x25CB;</span> not supported</div><div class="c me"><span class="mark">&#x25CF;</span> live chat</div></div>
-  <div class="v-row"><div class="k">Right-click &#x2192; ask on selection</div><div class="c"><span class="mark no">&#x25CB;</span> —</div><div class="c me"><span class="mark">&#x25CF;</span> any text</div></div>
-  <div class="v-row"><div class="k">In-browser source reader</div><div class="c"><span class="mark no">&#x25CB;</span> —</div><div class="c me"><span class="mark">&#x25CF;</span> built-in</div></div>
-  <div class="v-row"><div class="k">Update strategy</div><div class="c">unspecified</div><div class="c me"><span class="mark">&#x25CF;</span> full rebuild</div></div>
-  <div class="v-row"><div class="k">Runs locally</div><div class="c">cloud only</div><div class="c me"><span class="mark">&#x25CF;</span> localhost</div></div>
-  <div class="v-row"><div class="k">Your source code</div><div class="c">uploaded</div><div class="c me"><span class="mark">&#x25CF;</span> never leaves</div></div>
-  <div class="v-row"><div class="k">Integration surface</div><div class="c">web app</div><div class="c me"><span class="mark">&#x25CF;</span> claude code skill</div></div>
+  <div class="v-row">
+    <div class="k">"What's in this repo?"</div>
+    <div class="c">run <code class="inline-code">find</code>, <code class="inline-code">tree</code>, skim README</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> directory map table</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"How does this function work?"</div>
+    <div class="c"><code class="inline-code">grep</code>, trace callers, read refs</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> explanation + code quotes</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"Why is it written this way?"</div>
+    <div class="c"><code class="inline-code">git log</code>, <code class="inline-code">git blame</code>, read PRs</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> rationale from git + Issues + PRs</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"How does data flow?"</div>
+    <div class="c">read + draw on whiteboard</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> Mermaid flowchart, auto-generated</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"What's the DB schema?"</div>
+    <div class="c">find migrations, read model defs</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> Mermaid ER diagram</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"Who depends on this module?"</div>
+    <div class="c"><code class="inline-code">madge</code>, <code class="inline-code">grep imports</code></div>
+    <div class="c me"><span class="mark">&#x25CF;</span> dependency graph</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"How do I set it up?"</div>
+    <div class="c">read scripts + trial &amp; error</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> setup guide from actual scripts</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"Where do I look when it breaks?"</div>
+    <div class="c"><code class="inline-code">grep catch</code>, find log points</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> error flow map (--debug mode)</div>
+  </div>
+  <div class="v-row">
+    <div class="k">"can I ask follow-ups?"</div>
+    <div class="c">start a new AI session, paste code</div>
+    <div class="c me"><span class="mark">&#x25CF;</span> right-click → ask, inline</div>
+  </div>
+
+  <p style="font-family:var(--mono);font-size:13px;color:var(--mute);margin-top:24px;max-width:62ch">
+    // same answers. same depth. no senior required.
+  </p>
 </section>
 
 <section class="wrap end">
