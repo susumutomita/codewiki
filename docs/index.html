@@ -614,9 +614,9 @@
         <span class="line"><em>talk</em> back.</span>
       </h1>
       <p class="hero-sub">
-        codewiki rebuilds your entire codebase into a <span class="hl">browsable wiki</span> every time you run it — then lets you <b>right-click anything</b> to ask the same AI that wrote it.
+        Every codebase has <span class="hl">a senior who knows the right commands</span> to understand it. codewiki encodes those commands — git log, grep, ctags, gh — into a single skill. Anyone runs <b>/codewiki</b>, gets the same depth.
         <br><br>
-        <span class="mute">// a claude code skill. local. zero config. zero stale docs.</span>
+        <span class="mute">// democratizes AI-assisted code reading. local. zero stale docs.</span>
       </p>
 
       <div class="install" role="button" tabindex="0" id="installBox">
@@ -702,13 +702,24 @@
 <section class="wrap" id="why">
   <div class="sec-head">
     <span class="idx">&#xA7; 01</span>
-    <span class="title">THREE IDEAS WE BUILT AROUND</span>
+    <span class="title">THE IDEAS WE BUILT AROUND</span>
     <span>/ principles</span>
   </div>
 
   <div class="manifest">
     <div class="mbig">
-      <div class="mbig-n">01 — rebuild, don't patch</div>
+      <div class="mbig-n">01 — the thesis</div>
+      <div class="mbig-key">democratize the skill</div>
+      <h3>AI-assisted code reading <em>is a skill</em>. codewiki hands it to everyone.</h3>
+      <p class="mdesc">
+        Senior engineers run <code>git log --oneline -- path/</code>, trace imports, check Issues, grep for error handlers. They ask AI the right questions in the right order and get deep understanding. Juniors ask "what does this file do?" and get shallow answers. Same AI, wildly different results.
+        <br><br>
+        codewiki encodes senior-level investigation — ctags, grep, git log, gh issue view, dependency graphs — into the skill itself. Whoever runs <code>/codewiki</code> gets the analysis a senior would produce after hours of digging. One command. No token waste across the team asking the same questions.
+      </p>
+    </div>
+
+    <div class="mbig">
+      <div class="mbig-n">02 — rebuild, don't patch</div>
       <div class="mbig-key">zero drift</div>
       <h3>Docs are <em>generated</em>, not <em>maintained</em>.</h3>
       <p class="mdesc">
@@ -718,7 +729,7 @@
     </div>
 
     <div class="mbig">
-      <div class="mbig-n">02 — the author answers the question</div>
+      <div class="mbig-n">03 — the author answers the question</div>
       <div class="mbig-key">same model</div>
       <h3>No chatbot <em>bolted on</em>. The writer is the reader.</h3>
       <p class="mdesc">
@@ -728,7 +739,7 @@
     </div>
 
     <div class="mbig">
-      <div class="mbig-n">03 — your code never leaves</div>
+      <div class="mbig-n">04 — your code never leaves</div>
       <div class="mbig-key">local, offline-capable</div>
       <h3>A wiki, <em>on localhost</em>. Forever.</h3>
       <p class="mdesc">

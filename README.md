@@ -16,11 +16,37 @@
 <p align="center">
   <a href="https://susumutomita.github.io/codewiki">Website</a> &middot;
   <a href="#install">Install</a> &middot;
+  <a href="#why">Why</a> &middot;
   <a href="#how-it-works">How it works</a> &middot;
   <a href="#vs-deepwiki">vs DeepWiki</a>
 </p>
 
 ---
+
+## Why codewiki exists <a name="why"></a>
+
+**AI-assisted code reading is a skill — and it's not distributed evenly.**
+
+Senior engineers run `git log --oneline -- path/`, trace imports, check related Issues, grep for error handlers. They ask AI the right questions in the right order and get deep understanding. Juniors ask "what does this file do?" and get shallow answers. Same AI, wildly different results.
+
+codewiki encodes senior-level investigation techniques — `ctags`, `grep import`, `git log`, `gh issue view`, dependency graphs — into the skill itself. Whoever runs `/codewiki` gets the same thorough analysis a senior engineer would produce after hours of digging.
+
+**codewiki democratizes AI-assisted code reading.**
+
+And it does it in one command, answering upfront every question you would have asked AI one-by-one anyway:
+
+```
+"What's this directory?"        → directory map table
+"How does this function work?"  → explanation with code quotes
+"Why is it written this way?"   → design rationale from git log / Issues / PRs
+"How does data flow?"           → Mermaid flowchart
+"What's the DB schema?"         → Mermaid ER diagram
+"Who depends on this module?"   → dependency graph
+"How do I set it up?"           → setup guide
+"Where do I look when it breaks?" → error flow map
+```
+
+All in one `/codewiki`. No more paying tokens to ask the same questions across your team.
 
 ## Install
 
