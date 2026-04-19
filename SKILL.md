@@ -265,6 +265,8 @@ git log --oneline -10 -- path/to/module/key_file.ts
 Mermaid図は以下の形式で埋め込む。CDNからMermaidを読み込むscriptタグをHTMLのheadに追加すること:
 ```html
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
 <script>mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#E4DFD3',primaryBorderColor:'#0B0B0B',primaryTextColor:'#0B0B0B',lineColor:'#6E6A5E',secondaryColor:'#EEFF57',tertiaryColor:'#ECE8DE'}});</script>
 ```
 図は `<pre class="mermaid">` タグで囲む:
@@ -445,6 +447,24 @@ li{margin:3px 0 3px 20px;color:var(--ink-soft)}
 pre{background:var(--bg-2);border:1px solid var(--rule);padding:16px;overflow-x:auto;font-size:12.5px;line-height:1.5;margin:12px 0;font-family:var(--mono)}
 code{font-family:var(--mono);font-size:12.5px}
 .inline-code{background:var(--bg-2);border:1px solid var(--rule-soft);padding:1px 5px;font-size:12px}
+
+/* syntax highlighting — mono-brutalist theme (paper + ink + accent) */
+.hljs{background:transparent;color:var(--ink)}
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-section{color:var(--accent);font-weight:500}
+.hljs-string,.hljs-attr,.hljs-symbol,.hljs-regexp,.hljs-link{color:var(--ok)}
+.hljs-title,.hljs-title.function_,.hljs-name,.hljs-type{color:var(--ink);font-weight:600}
+.hljs-comment,.hljs-quote,.hljs-deletion,.hljs-meta{color:var(--mute);font-style:italic}
+.hljs-number,.hljs-literal,.hljs-variable,.hljs-template-variable,.hljs-tag .hljs-attr{color:#B45309}
+.hljs-params,.hljs-property{color:var(--ink-soft)}
+.hljs-tag,.hljs-tag .hljs-name{color:var(--accent)}
+.hljs-addition,.hljs-selector-attr,.hljs-selector-pseudo{color:var(--ok);background:rgba(21,128,61,.08)}
+.hljs-strong{font-weight:700;color:var(--ink)}
+.hljs-emphasis{font-style:italic}
+/* terminal theme variant for dark mode code blocks */
+html[data-theme="terminal"] .hljs-keyword{color:#B6FF3C}
+html[data-theme="terminal"] .hljs-string{color:#8FE06B}
+html[data-theme="terminal"] .hljs-comment{color:#6A6A5A}
+html[data-theme="terminal"] .hljs-number{color:#FFC96B}
 
 /* tables */
 table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;font-family:var(--mono)}
@@ -655,6 +675,7 @@ const spBody=document.getElementById('spBody');
 const spGithub=document.getElementById('spGithub');
 document.getElementById('spClose').onclick=closeSource;
 function closeSource(){spPanel.classList.remove('open');document.body.classList.remove('split')}
+function extToLang(path){const e=(path.split('.').pop()||'').toLowerCase();return{ts:'typescript',tsx:'typescript',js:'javascript',jsx:'javascript',py:'python',go:'go',rs:'rust',rb:'ruby',java:'java',kt:'kotlin',swift:'swift',cs:'csharp',cpp:'cpp',c:'c',h:'c',hpp:'cpp',php:'php',sh:'bash',bash:'bash',zsh:'bash',yaml:'yaml',yml:'yaml',json:'json',toml:'ini',ini:'ini',cfg:'ini',html:'xml',xml:'xml',css:'css',scss:'scss',md:'markdown',sql:'sql',graphql:'graphql',proto:'protobuf',tf:'hcl',hcl:'hcl',dockerfile:'dockerfile',vue:'xml',svelte:'xml'}[e]||'plaintext'}
 async function openSource(path,ghUrl){
   spPath.textContent=path;
   if(ghUrl){spGithub.href=ghUrl;spGithub.style.display=''}else{spGithub.style.display='none'}
@@ -662,8 +683,16 @@ async function openSource(path,ghUrl){
   spBody.innerHTML='<pre style="color:var(--mute);padding:20px">loading...</pre>';
   try{
     const r=await fetch('/api/file?path='+encodeURIComponent(path));
-    if(r.ok){const d=await r.json();const lines=d.content.split(String.fromCharCode(10));
-      spBody.innerHTML='<pre>'+lines.map(function(l,i){return'<span class="ln">'+(i+1)+'</span>'+escH(l)}).join(String.fromCharCode(10))+'</pre>';
+    if(r.ok){
+      const d=await r.json();
+      const lang=extToLang(path);
+      // Highlight full source first, then split into lines with gutter
+      const tmp=document.createElement('code');
+      tmp.className='language-'+lang;
+      tmp.textContent=d.content;
+      if(window.hljs){hljs.highlightElement(tmp)}
+      const highlightedLines=tmp.innerHTML.split(String.fromCharCode(10));
+      spBody.innerHTML='<pre><code class="hljs language-'+lang+'">'+highlightedLines.map(function(l,i){return'<span class="ln">'+(i+1)+'</span>'+l}).join(String.fromCharCode(10))+'</code></pre>';
     }else{spBody.innerHTML='<pre style="color:var(--ink);padding:20px">not found</pre>'}
   }catch(e){spBody.innerHTML='<pre style="padding:20px">cannot connect</pre>'}
 }
