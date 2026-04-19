@@ -1,18 +1,21 @@
 {
-  "name": "claude-code-viewer",
+  "name": "codewiki",
   "version": "1.0.0",
-  "description": "DeepWiki-style code documentation with native Claude Code integration. Full rebuild every run.",
+  "description": "DeepWiki, but you can talk to it. Any codebase → interactive wiki with live AI chat.",
   "keywords": [
     "claude-code",
     "claude-code-skill",
     "documentation",
     "code-wiki",
-    "deepwiki"
+    "deepwiki",
+    "ai",
+    "codebase"
   ],
   "author": "susumutomita",
   "license": "MIT",
+  "homepage": "https://susumutomita.github.io/codewiki",
   "repository": {
     "type": "git",
-    "url": "https://github.com/susumutomita/claude-code-viewer.git"
+    "url": "https://github.com/susumutomita/codewiki.git"
   }
 }
