@@ -195,7 +195,23 @@ Generate the wiki content in **Japanese**. Follow this exact section structure. 
 - **重要な関数・クラス**: シグネチャとコード引用付きで解説。`<pre>` でコードブロックを表示
 - **データモデル**: 扱うデータ構造やスキーマ。あればMermaid ER図
 - **他モジュールとの関係**: どこから呼ばれ、何に依存しているか
-- **注意点・設計判断**: なぜこの実装になっているかの背景
+- **設計根拠 (per-module)**: 以下のコマンドで取得した情報を元に、このモジュールがなぜこう設計されたかを書く:
+
+```bash
+# このモジュール/ディレクトリの変更履歴
+git log --oneline -20 -- path/to/module/
+
+# このモジュールに関連するIssue (ディレクトリ名やモジュール名で検索)
+gh search issues "module_name" --repo owner/repo --limit 10 --json number,title 2>/dev/null
+
+# このモジュールに関連するPR
+gh search prs "module_name" --repo owner/repo --limit 10 --json number,title --state merged 2>/dev/null
+
+# 主要ファイル個別の履歴 (git blame で最も変更されたセクション)
+git log --oneline -10 -- path/to/module/key_file.ts
+```
+
+各ファイルの説明にも設計根拠を添える。「コミット `abc123` で追加。PRの説明: "認証フローをリファクタリングして..." 」のように、開発者の言葉を引用する。意図が履歴から読み取れない場合はコードの構造から推測し、推測であることを明記する。
 
 #### § (N+1) — Design History (設計経緯) ※git/GitHub が使える場合
 コミット履歴・Issue・PRから抽出した設計判断の経緯。AIの推測ではなく開発者の言葉を引用:
