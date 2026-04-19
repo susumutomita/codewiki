@@ -1,9 +1,46 @@
 ---
 name: codewiki
-description: Generate a DeepWiki-style interactive code documentation site for the current project. Scans the entire codebase, analyzes every major component, and generates a self-contained HTML wiki with live Claude Code chat integration (right-click → ask, chat widget, file reader). Every run is a full rebuild — no stale docs.
+description: Generate a DeepWiki-style interactive code documentation site for the current project. Scans the entire codebase, analyzes every major component, and generates a self-contained HTML wiki with live Claude Code chat integration (right-click → ask, chat widget, file reader). Every run is a full rebuild — no stale docs. Supports modes - /codewiki (onboarding), /codewiki --deep (enhancement), /codewiki --debug (incident).
 ---
 
 You are generating a comprehensive, interactive code documentation wiki for the current project.
+
+## Modes
+
+Check the user's input for mode flags. The mode changes what content to emphasize:
+
+### Default (no flag) — Onboarding mode
+Focus: **新しくプロジェクトに入った人が全体を理解すること**
+- プロジェクトの目的・背景を丁寧に
+- **ディレクトリ構成**: 全ディレクトリの役割を表で一覧化。「ここに何がある」が即わかること
+- **アーキテクチャ図** (Mermaid): システム全体の構成。コンポーネント間の矢印で関係を示す
+- **主要機能のフローチャート** (Mermaid flowchart): 「ユーザーがこれをすると何が起きるか」を主要な操作3つ以上で図示
+- **ER図** (Mermaid erDiagram): データベースやデータモデルの構造。テーブル/コレクション/型の関係
+- **クラス図 / モジュール関係図** (Mermaid classDiagram): 主要なクラスやモジュールの依存関係
+- 「なぜこう作られているか」の設計判断
+- セットアップ手順を詳細に
+- 用語集 (プロジェクト固有の用語があれば)
+
+### `--deep` flag — Enhancement mode
+Focus: **機能追加・改修する人が実装詳細を把握すること**
+- 各モジュールの内部実装を深掘り
+- 関数・クラスのシグネチャとロジックを詳細に解説
+- データモデル・スキーマを網羅
+- API リファレンスを完全に
+- モジュール間の依存関係・呼び出しフローを詳細に
+- テスト構成とカバレッジ
+- 拡張ポイント・プラグイン機構があれば解説
+
+### `--debug` flag — Incident / Debug mode
+Focus: **障害対応・デバッグする人が問題箇所を特定すること**
+- エラーハンドリングのフロー (どこで catch して何が起きるか)
+- ログ出力箇所の一覧 (ファイル:行番号, ログレベル, 出力内容)
+- リトライ・タイムアウト・サーキットブレーカーの設定
+- 外部依存 (DB, API, キュー) の接続設定と障害時の挙動
+- 環境変数・設定値が実行時にどう影響するか
+- ヘルスチェック・監視ポイント
+- 「ここが壊れたらこうなる」のフェイルモード分析
+- デバッグに使えるコマンド・エンドポイント
 
 ## Process
 
@@ -87,13 +124,20 @@ graph TD
 - 「〜だと思われます」のような推測は避ける。コードを読んで事実を述べる
 - 各セクションの末尾に、そのセクションを深掘りするための質問プロンプトを `.ask-block` で配置する
 
+### Step 2.5: Detect GitHub remote
+
+Run `git remote get-url origin` to detect the GitHub URL. Extract the owner/repo (e.g. `susumutomita/codewiki`) and default branch. Store this — the generated HTML will use it for GitHub links.
+
 ### Step 3: Generate the static site
 
 Create the file `.codewiki/index.html` using the Write tool. The HTML must:
 
 1. Include ALL analysis content rendered as styled HTML
 2. Include the interactive features (see HTML template below)
-3. Be completely self-contained (inline CSS/JS, no external dependencies)
+3. Be completely self-contained (except Google Fonts and Mermaid CDN)
+4. Include a **split-pane view**: documentation on the left, source code panel on the right
+5. Every file path mentioned in the docs should be a clickable link that opens that file in the right pane
+6. If a GitHub remote was detected, show a "View on GitHub" link for each file
 
 ### Step 4: Start the server
 
@@ -126,9 +170,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             if not str(t).startswith(ROOT): return s._j(403,{'error':'denied'})
             if not t.is_file(): return s._j(404,{'error':'not found'})
             try:
-                c=t.read_text(errors='replace');lines=c.split(chr(10))
-                if len(lines)>500: c=chr(10).join(lines[:500])
-                s._j(200,{'content':c,'path':rel})
+                c=t.read_text(errors='replace')
+                s._j(200,{'content':c,'path':rel,'lines':c.count(chr(10))+1})
             except Exception as e: s._j(500,{'error':str(e)})
         else: super().do_GET()
     def _j(s,st,d):
@@ -252,14 +295,34 @@ th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)
 .ask-block .ask-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);white-space:nowrap;font-weight:500}
 .ask-block:hover .ask-label{color:var(--hl)}
 
-/* file reader */
+/* split pane: source panel (right side) */
+.source-panel{position:fixed;top:52px;right:0;bottom:0;width:0;background:var(--bg);border-left:1px solid var(--rule);z-index:45;transition:width .2s;overflow:hidden;display:flex;flex-direction:column}
+.source-panel.open{width:50%}
+.source-panel .sp-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--rule);background:var(--bg-2);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);gap:8px;flex-shrink:0}
+.source-panel .sp-head .sp-path{color:var(--ink);font-weight:500;text-transform:none;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.source-panel .sp-head a{color:var(--accent);font-size:10px;white-space:nowrap}
+.source-panel .sp-head a:hover{text-decoration:underline}
+.source-panel .sp-close{cursor:pointer;color:var(--mute);font-size:14px;padding:0 4px}
+.source-panel .sp-close:hover{color:var(--ink)}
+.source-panel .sp-body{flex:1;overflow:auto;padding:0}
+.source-panel .sp-body pre{margin:0;border:none;padding:16px;font-size:12.5px;line-height:1.6;counter-reset:line}
+.source-panel .sp-body pre .ln{display:inline-block;width:40px;text-align:right;padding-right:12px;color:var(--mute);opacity:.5;user-select:none;border-right:1px solid var(--rule-soft);margin-right:12px}
+body.split .main{max-width:calc(50vw - var(--sidebar-w) - 20px)}
+body.split .sidebar{width:200px}
+body.split .chat-panel{right:52%}
+
+/* file link (clickable paths in docs) */
+.file-link{color:var(--accent);cursor:pointer;border-bottom:1px dashed var(--accent);font-family:var(--mono);font-size:12.5px}
+.file-link:hover{color:var(--ink);border-color:var(--ink)}
+
+/* file reader (fallback for bottom section) */
 .file-reader{border:1px solid var(--rule);margin:16px 0;overflow:hidden}
 .file-reader-bar{display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--rule);background:var(--bg-2)}
 .file-reader-bar input{flex:1;background:var(--bg);border:1px solid var(--rule);padding:6px 10px;color:var(--ink);font-size:12px;font-family:var(--mono);outline:none}
 .file-reader-bar input:focus{border-color:var(--accent)}
 .file-reader-bar button{background:var(--ink);color:var(--bg);border:none;padding:6px 14px;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;cursor:pointer}
 .file-reader-bar button:hover{background:var(--accent);color:var(--accent-ink)}
-.file-reader-content{max-height:500px;overflow:auto}
+.file-reader-content{overflow:auto}
 .file-reader-content pre{margin:0;border:none}
 
 /* context menu */
@@ -350,23 +413,25 @@ th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)
   </div>
 -->
 
-<!-- FILE TREE SECTION -->
-<!-- <h2 id="file-tree">File Tree</h2> ... -->
+<!-- FILE TREE and FILE READER sections go here -->
 
-<!-- FILE READER SECTION -->
-<!--
-<h2 id="file-reader">File Reader</h2>
-<div class="file-reader">
-  <div class="file-reader-bar">
-    <input id="filePathInput" type="text" placeholder="path/to/file.ts" onkeydown="if(event.key==='Enter')loadFile()">
-    <button onclick="loadFile()">Open</button>
-  </div>
-  <div class="file-reader-content" id="fileContent">
-    <pre style="color:var(--mute);padding:20px;text-align:center">Click a file in the tree or type a path</pre>
-  </div>
+<!-- IMPORTANT: For file paths in docs, use <span class="file-link" data-path="path/to/file.ts">path/to/file.ts</span>
+     This makes them clickable → opens in the split source panel on the right.
+     If a GitHub remote was detected, also set data-github="https://github.com/owner/repo/blob/main/path/to/file.ts"
+     on each file-link so the panel shows a "View on GitHub" link. -->
+
 </div>
--->
 
+<!-- Source Panel (split view — right side) -->
+<div class="source-panel" id="sourcePanel">
+  <div class="sp-head">
+    <span class="sp-path" id="spPath">—</span>
+    <a id="spGithub" href="#" target="_blank" rel="noopener" style="display:none">GitHub →</a>
+    <span class="sp-close" id="spClose">close ✕</span>
+  </div>
+  <div class="sp-body" id="spBody">
+    <pre style="color:var(--mute);padding:20px;text-align:center">ファイルを選択してください</pre>
+  </div>
 </div>
 
 <!-- Context Menu -->
@@ -407,8 +472,32 @@ document.getElementById('ctxAsk').onclick=()=>sendChat('"'+sel+'" — explain th
 document.getElementById('ctxExplain').onclick=()=>sendChat('Explain: '+sel);
 document.getElementById('ctxDeep').onclick=()=>sendChat('Find "'+sel+'" in the source code and explain the implementation');
 document.getElementById('ctxCopy').onclick=()=>{navigator.clipboard.writeText(sel);showToast('copied')};
-async function loadFile(){const p=document.getElementById('filePathInput').value.trim(),c=document.getElementById('fileContent');if(!p)return;c.innerHTML='<pre style="color:var(--mute);padding:20px">loading...</pre>';try{const r=await fetch('/api/file?path='+encodeURIComponent(p));if(r.ok){const d=await r.json();c.innerHTML='<pre><code>'+escH(d.content)+'</code></pre>'}else{c.innerHTML='<pre style="color:var(--ink);padding:20px">not found</pre>'}}catch(e){c.innerHTML='<pre style="padding:20px">cannot connect</pre>'}}
-document.querySelectorAll('.file-tree .file').forEach(el=>{el.addEventListener('click',()=>{let parts=[el.textContent],node=el.closest('li');while(node.parentElement&&node.parentElement.closest('li')){node=node.parentElement.closest('li');const d=node.querySelector(':scope > .dir');if(d)parts.unshift(d.textContent.replace('/',''))}document.getElementById('filePathInput').value=parts.join('/');loadFile();document.getElementById('file-reader').scrollIntoView({behavior:'smooth'})})});
+
+/* ── source panel (split view) ── */
+const spPanel=document.getElementById('sourcePanel');
+const spPath=document.getElementById('spPath');
+const spBody=document.getElementById('spBody');
+const spGithub=document.getElementById('spGithub');
+document.getElementById('spClose').onclick=closeSource;
+function closeSource(){spPanel.classList.remove('open');document.body.classList.remove('split')}
+async function openSource(path,ghUrl){
+  spPath.textContent=path;
+  if(ghUrl){spGithub.href=ghUrl;spGithub.style.display=''}else{spGithub.style.display='none'}
+  spPanel.classList.add('open');document.body.classList.add('split');
+  spBody.innerHTML='<pre style="color:var(--mute);padding:20px">loading...</pre>';
+  try{
+    const r=await fetch('/api/file?path='+encodeURIComponent(path));
+    if(r.ok){const d=await r.json();const lines=d.content.split(String.fromCharCode(10));
+      spBody.innerHTML='<pre>'+lines.map(function(l,i){return'<span class="ln">'+(i+1)+'</span>'+escH(l)}).join(String.fromCharCode(10))+'</pre>';
+    }else{spBody.innerHTML='<pre style="color:var(--ink);padding:20px">not found</pre>'}
+  }catch(e){spBody.innerHTML='<pre style="padding:20px">cannot connect</pre>'}
+}
+/* clickable file-links in docs */
+document.querySelectorAll('.file-link').forEach(function(el){el.addEventListener('click',function(){openSource(el.dataset.path,el.dataset.github||'')})});
+/* clickable file tree */
+document.querySelectorAll('.file-tree .file').forEach(function(el){el.addEventListener('click',function(){var parts=[el.textContent],node=el.closest('li');while(node.parentElement&&node.parentElement.closest('li')){node=node.parentElement.closest('li');var d=node.querySelector(':scope > .dir');if(d)parts.unshift(d.textContent.replace('/',''))}openSource(parts.join('/'),'')})});
+/* also update the bottom file reader */
+async function loadFile(){var p=document.getElementById('filePathInput').value.trim();if(!p)return;openSource(p,'')};
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
 const navLinks=document.querySelectorAll('.sidebar .nav-link');
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){navLinks.forEach(l=>l.classList.remove('active'));const l=document.querySelector('.nav-link[href="#'+e.target.id+'"]');if(l)l.classList.add('active')}})},{rootMargin:'-20% 0px -70% 0px'});
