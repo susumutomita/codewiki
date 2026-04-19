@@ -1,37 +1,61 @@
 # Product Hunt Submission
 
 ## Tagline (60 chars max)
-DeepWiki, but you can talk to it.
+
+Democratize AI-assisted code reading. One command.
+
+Alternative: `Every codebase has a senior. codewiki clones them.`
 
 ## Description
 
-**codewiki** turns any codebase into an interactive documentation wiki — with live AI chat built in.
+**codewiki** turns every developer into a senior code reader.
 
 ### The problem
-Code documentation goes stale the moment you write it. DeepWiki generates docs from code, but you can't ask follow-up questions. You're stuck reading static pages when what you really want is to *understand*.
+
+AI-assisted code reading is a skill — and it's not distributed evenly.
+
+Senior engineers run `git log --oneline -- path/`, trace imports, check related Issues, grep for error handlers. They ask AI the right questions in the right order and get deep understanding.
+
+Juniors ask *"what does this file do?"* and get shallow answers.
+
+Same AI, wildly different results.
 
 ### The solution
-Type `/codewiki` in Claude Code. It reads your entire codebase, generates a rich documentation site, and lets you **talk to it**:
 
-- **Right-click any text** → "Ask Claude Code" — get instant answers
-- **Chat widget** — ask anything about the codebase from the browser
-- **File reader** — browse source code and ask questions inline
-- **Full rebuild every run** — no stale docs, ever
+`/codewiki` encodes senior-level investigation — ctags, grep, git log, gh issue view, dependency graphs — into a Claude Code skill. Whoever runs it gets the analysis a senior engineer would produce after hours of digging.
+
+Every question you would have asked AI one-by-one, answered upfront:
+
+- *"What's this directory?"* → directory map
+- *"How does this function work?"* → explanation with code quotes
+- *"Why is it written this way?"* → design rationale from git log, Issues, PRs
+- *"How does data flow?"* → Mermaid flowchart
+- *"What's the DB schema?"* → ER diagram
+- *"Who depends on this module?"* → dependency graph
+- *"How do I set it up?"* → setup guide from actual scripts
+- *"Where do I look when it breaks?"* → error flow map
+
+All in one command. Generated in your language. 100% local.
 
 ### What makes it different
 
-1. **AI-native integration** — not a bolt-on chatbot, it's Claude Code itself powering the wiki
-2. **Full rebuild, not incremental** — AI is bad at diff-updating docs. We regenerate from scratch every time. Zero drift.
-3. **100% local** — your code never leaves your machine
-4. **Works on any stack** — TypeScript, Python, Go, Rust, Java, CDK, Terraform...
+1. **Democratization, not generation** — Other tools generate docs. codewiki encodes investigation skills.
+2. **Anti-hallucination by design** — Uses real tools (ctags, grep, git log) for facts. AI only interprets. Every claim is traceable to a file:line or commit hash.
+3. **Full rebuild, not incremental** — AI can't reliably diff-update docs. We regenerate from scratch. Zero stale content.
+4. **100% local** — Runs on localhost. Your code never leaves your machine.
+5. **Three modes**:
+   - `/codewiki` — onboarding (architecture, flowcharts, ER diagrams)
+   - `/codewiki --deep` — enhancement (implementation details, test coverage)
+   - `/codewiki --debug` — incident (error flows, log locations, fail modes)
 
 ### How it works
-1. `npx skills add susumutomita/codewiki` (one-time install)
-2. Open any project in Claude Code
-3. Type `/codewiki`
-4. Browse the generated wiki at localhost:8080
 
-Built as a Claude Code skill — it runs inside your existing AI coding workflow, not as a separate tool.
+```
+npx skills add susumutomita/codewiki    # one-time install
+/codewiki                                # in any project
+```
+
+Claude Code runs `git log`, `grep`, `ctags`, `gh issue view`, reads key files, and generates an interactive HTML wiki with live chat, right-click-to-ask, split-pane source viewer. Opens in your browser on localhost:8080.
 
 ---
 
@@ -39,24 +63,30 @@ Built as a Claude Code skill — it runs inside your existing AI coding workflow
 
 Hey PH! 👋
 
-I built codewiki because I was frustrated with code documentation that goes stale.
+I built codewiki because I kept watching the same pattern: seniors get incredible insight from AI because they know what to ask. Juniors get surface-level answers to surface-level questions.
 
-**The backstory:** I was using Claude Code to understand a complex AWS SaaS reference architecture. I asked it to explain the codebase, and the analysis was incredible — but it disappeared when I closed the terminal. So I thought: what if Claude Code could generate a *persistent, browsable* documentation site that you can still talk to?
+The gap isn't AI capability. The gap is **knowing the investigation technique.**
 
-**Why "full rebuild"?** After months of using AI for docs, I learned one thing: AI is terrible at incremental updates. It fixes section A but forgets to update section B. Renamed files leave ghost references. The solution is dead simple — regenerate everything from scratch. Yes, it costs more tokens. But the docs are always correct.
+So I encoded senior-level code reading — `git log --oneline -- path/`, `grep error handling`, `gh issue view`, `ctags`, dependency graphs — into a single Claude Code skill. Type `/codewiki`, get the analysis a senior would produce after hours of digging.
 
-**Why a Claude Code skill?** Because the AI that *generates* the docs is the same AI that *answers your questions*. No API middleman, no separate chatbot. Select text, right-click, ask. It just works.
+**Key design decisions:**
+
+- **Tools for facts, AI for interpretation.** Dependency graphs come from `madge`/`grep`. Commit history from `git log`. Design intent from actual PR discussions. AI only synthesizes what the tools found — cuts hallucination drastically.
+- **Full rebuild every run.** AI is terrible at diff-updating docs. Regenerate from scratch. Docs are always current.
+- **Right-click in the wiki to ask Claude.** The same AI that read your repo writes the wiki AND answers your follow-ups. Zero context-switching.
 
 Try it:
+
 ```
 npx skills add susumutomita/codewiki
 ```
 
-Would love your feedback! 🙏
+Curious what you think. The thesis I'm testing: **AI leverage is actually a skill, and encoding that skill as reusable tooling is the 10x move.**
 
 ---
 
 ## Topics/Tags
+
 - Developer Tools
 - Artificial Intelligence
 - Open Source
@@ -64,13 +94,16 @@ Would love your feedback! 🙏
 - Productivity
 
 ## Thumbnail text
-Any codebase → AI wiki you can talk to
 
-## Maker comment keywords
+Democratize AI-assisted code reading.
+
+## Keywords
+
 - Claude Code skill
-- DeepWiki alternative
 - Code documentation
-- AI-powered
-- Full rebuild
+- Senior engineer investigation techniques
+- git log, grep, ctags automation
+- Anti-hallucination with static analysis
+- Full rebuild (no stale docs)
 - Right-click to ask
 - 100% local

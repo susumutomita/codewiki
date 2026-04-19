@@ -1,13 +1,14 @@
 {
   "name": "codewiki",
   "version": "1.0.0",
-  "description": "DeepWiki, but you can talk to it. Any codebase → interactive wiki with live AI chat.",
+  "description": "Democratize AI-assisted code reading. A Claude Code skill that encodes senior-level investigation techniques (git log, grep, ctags, gh) into one command.",
   "keywords": [
     "claude-code",
     "claude-code-skill",
+    "code-reading",
     "documentation",
-    "code-wiki",
-    "deepwiki",
+    "senior-engineering",
+    "investigation",
     "ai",
     "codebase"
   ],
