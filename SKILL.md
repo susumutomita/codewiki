@@ -121,62 +121,77 @@ find . -type f \( -name "*.ts" -o -name "*.py" -o -name "*.go" -o -name "*.rs" -
 
 以下のツールを**インストールされていれば実行**、なければ静かにスキップする。結果はすべて wiki の **§ Metrics & Health** セクションに統合する。
 
+**重要 — Supply chain safety:**
+以下のツールはユーザーが**事前にインストールしている場合のみ**実行する。`npx --yes` のような auto-install は使わない (未知のパッケージを自動インストールしてしまう supply-chain リスク)。インストールされていない場合は静かにスキップし、Metrics & Health に "not measured" と正直に記載する。
+
+各ツールの存在確認には `command -v` を使う:
+
 ```bash
 # ============================================================
 # Dependency graphs (モジュール依存の正確な抽出)
 # ============================================================
 
-# JS/TS: madge — circular deps, orphans, dependency tree
-npx --yes madge --json src/ 2>/dev/null > /tmp/codewiki-madge.json
-npx --yes madge --circular --json src/ 2>/dev/null > /tmp/codewiki-circular.json
-# → circular deps があれば Metrics & Health に赤旗を立てる
+# JS/TS: madge (要事前インストール: npm i -g madge)
+command -v madge >/dev/null 2>&1 && {
+  madge --json src/ > /tmp/codewiki-madge.json 2>/dev/null
+  madge --circular --json src/ > /tmp/codewiki-circular.json 2>/dev/null
+}
 
-# Python: pydeps or pipdeptree
-pydeps --noshow --show-deps --max-bacon=3 -o /tmp/codewiki-pydeps.svg . 2>/dev/null || \
-  pipdeptree --json 2>/dev/null > /tmp/codewiki-pipdeps.json
+# Python: pydeps (pip install pydeps) or pipdeptree
+command -v pydeps >/dev/null 2>&1 && \
+  pydeps --noshow --show-deps --max-bacon=3 -o /tmp/codewiki-pydeps.svg . 2>/dev/null
+command -v pipdeptree >/dev/null 2>&1 && \
+  pipdeptree --json > /tmp/codewiki-pipdeps.json 2>/dev/null
 
 # Go: すでに上で取得済み (go mod graph)
 
-# Rust: cargo tree --prefix depth (より詳細)
-cargo tree --prefix depth --format "{p}" 2>/dev/null > /tmp/codewiki-cargo.txt
+# Rust: cargo tree (Cargo 同梱)
+command -v cargo >/dev/null 2>&1 && \
+  cargo tree --prefix depth --format "{p}" > /tmp/codewiki-cargo.txt 2>/dev/null
 
 # ============================================================
 # Cyclomatic complexity (リファクタ候補の特定)
 # ============================================================
 
-# Python: radon (CC: cyclomatic, MI: maintainability index)
-radon cc -j -s . 2>/dev/null > /tmp/codewiki-radon-cc.json
-radon mi -j . 2>/dev/null > /tmp/codewiki-radon-mi.json
-# → CC が C (>10) 以上の関数を hotspot 候補として抽出
+# Python: radon (pip install radon)
+command -v radon >/dev/null 2>&1 && {
+  radon cc -j -s . > /tmp/codewiki-radon-cc.json 2>/dev/null
+  radon mi -j . > /tmp/codewiki-radon-mi.json 2>/dev/null
+}
 
-# JS/TS: eslintcc (or eslint with complexity rule)
-npx --yes eslintcc --format json 'src/**/*.{ts,tsx,js,jsx}' 2>/dev/null > /tmp/codewiki-eslintcc.json
+# JS/TS: eslintcc (要事前インストール: npm i -g eslintcc)
+command -v eslintcc >/dev/null 2>&1 && \
+  eslintcc --format json 'src/**/*.{ts,tsx,js,jsx}' > /tmp/codewiki-eslintcc.json 2>/dev/null
 
-# Go: gocyclo
-gocyclo -top 30 . 2>/dev/null > /tmp/codewiki-gocyclo.txt
+# Go: gocyclo (go install github.com/fzipp/gocyclo/cmd/gocyclo@latest)
+command -v gocyclo >/dev/null 2>&1 && \
+  gocyclo -top 30 . > /tmp/codewiki-gocyclo.txt 2>/dev/null
 
 # ============================================================
 # Architecture violations (レイヤ違反の検出)
 # ============================================================
 
-# JS/TS: dependency-cruiser (プロジェクトに .dependency-cruiser.js があれば検出)
-npx --yes depcruise --validate --output-type json src 2>/dev/null > /tmp/codewiki-depcruise.json
+# JS/TS: dependency-cruiser (要事前インストール: npm i -g dependency-cruiser)
+# プロジェクトに .dependency-cruiser.js がある場合のみ有用
+command -v depcruise >/dev/null 2>&1 && [ -f .dependency-cruiser.js -o -f .dependency-cruiser.cjs ] && \
+  depcruise --validate --output-type json src > /tmp/codewiki-depcruise.json 2>/dev/null
 
-# Python: import-linter (.importlinter があれば)
-lint-imports --json 2>/dev/null > /tmp/codewiki-import-linter.json
+# Python: import-linter (pip install import-linter)
+# プロジェクトに .importlinter がある場合のみ
+command -v lint-imports >/dev/null 2>&1 && [ -f .importlinter ] && \
+  lint-imports --json > /tmp/codewiki-import-linter.json 2>/dev/null
 
 # ============================================================
-# Hot spot analysis (変更頻度 × 複雑度)
+# Hot spot analysis (変更頻度 × 複雑度) — git のみ必要 (事前インストール不要)
 # ============================================================
 
-# 変更頻度 (過去6ヶ月)
 git log --since="6 months ago" --name-only --pretty=format: 2>/dev/null | \
   sort | uniq -c | sort -rn | head -50 > /tmp/codewiki-churn.txt
 
-# Coupling: よく一緒に変更されるファイル (logical coupling)
-# (単純版: 同じコミットに出てくるファイル群)
 git log --name-only --pretty=format:"---%h" --since="6 months ago" 2>/dev/null > /tmp/codewiki-coupling.txt
 ```
+
+どのツールも実行されなかった場合 (言語が該当しない、インストールされていない)、Metrics & Health では正直に "not measured" と書く。推測で値を埋めない。
 
 #### Analyzer 結果の使い方 (重要)
 
@@ -438,44 +453,98 @@ Run this command to start the server and open the browser:
 
 ```bash
 python3 -c "
-import http.server, json, subprocess, os, sys
+# codewiki local server — hardened for local-only use.
+# Security model:
+#  - Binds to 127.0.0.1 only (not reachable from other machines)
+#  - Origin header check (blocks cross-origin requests from browsers)
+#  - Path-traversal prevention on file reads
+#  - Size limits on POST body
+#  - File size limit (1MB) on reads
+#  - Allowlist of file extensions for reads
+import http.server, json, subprocess, os, secrets, sys
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
-ROOT = os.getcwd()
+ROOT = str(Path(os.getcwd()).resolve())
 WIKI = os.path.join(ROOT, '.codewiki')
+ORIGIN = 'http://127.0.0.1:8080'
+ORIGIN_ALT = 'http://localhost:8080'
+MAX_POST = 64 * 1024              # 64KB max question
+MAX_FILE = 1024 * 1024            # 1MB max file read
+ALLOWED_EXTS = {'.ts','.tsx','.js','.jsx','.py','.go','.rs','.rb','.php','.java','.kt','.swift','.cs','.cpp','.c','.h','.hpp','.vue','.svelte','.astro','.html','.css','.scss','.less','.sql','.graphql','.proto','.tf','.hcl','.yaml','.yml','.json','.toml','.ini','.cfg','.sh','.bash','.zsh','.md','.mdx','.rst','.txt','.dockerfile','.Makefile',''}
+TOKEN = secrets.token_urlsafe(16)
 
 class H(http.server.SimpleHTTPRequestHandler):
-    def __init__(s, *a, **k): super().__init__(*a, directory=WIKI, **k)
+    def __init__(s, *a, **k):
+        super().__init__(*a, directory=WIKI, **k)
+    def _check_origin(s):
+        o = s.headers.get('Origin','')
+        # Same-origin requests from our own page have no Origin header.
+        # Accept missing Origin (direct navigation) AND exact match to our host.
+        if o == '' or o == ORIGIN or o == ORIGIN_ALT:
+            return True
+        s._j(403, {'error':'cross-origin request blocked'})
+        return False
     def do_POST(s):
-        if s.path=='/api/ask':
-            d=json.loads(s.rfile.read(int(s.headers.get('Content-Length',0))))
-            q=d.get('question','')
+        if not s._check_origin(): return
+        if s.path == '/api/ask':
+            n = int(s.headers.get('Content-Length','0') or 0)
+            if n > MAX_POST: return s._j(413, {'error':'payload too large'})
             try:
-                r=subprocess.run(['claude','-p','--output-format','text',q],capture_output=True,text=True,timeout=120,cwd=ROOT)
-                s._j(200,{'answer':r.stdout.strip() or r.stderr.strip() or '(empty)'})
-            except: s._j(500,{'error':'claude error'})
-        else: s._j(404,{})
+                d = json.loads(s.rfile.read(n))
+            except: return s._j(400, {'error':'bad json'})
+            q = (d.get('question','') or '').strip()
+            if not q: return s._j(400, {'error':'empty question'})
+            if len(q) > 8192: return s._j(413, {'error':'question too long'})
+            try:
+                r = subprocess.run(['claude','-p','--output-format','text',q],
+                    capture_output=True, text=True, timeout=120, cwd=ROOT)
+                s._j(200, {'answer': r.stdout.strip() or r.stderr.strip() or '(empty)'})
+            except subprocess.TimeoutExpired:
+                s._j(504, {'error':'timeout'})
+            except FileNotFoundError:
+                s._j(500, {'error':'claude CLI not found'})
+            except: s._j(500, {'error':'claude error'})
+        else: s._j(404, {})
     def do_GET(s):
         if s.path.startswith('/api/file'):
-            qs=parse_qs(urlparse(s.path).query);rel=qs.get('path',[''])[0]
-            t=Path(ROOT,rel).resolve()
-            if not str(t).startswith(ROOT): return s._j(403,{'error':'denied'})
-            if not t.is_file(): return s._j(404,{'error':'not found'})
+            if not s._check_origin(): return
+            qs = parse_qs(urlparse(s.path).query)
+            rel = (qs.get('path',[''])[0] or '').lstrip('/')
+            if not rel: return s._j(400, {'error':'path required'})
+            t = Path(ROOT, rel).resolve()
+            # Path traversal prevention: resolved path must stay under ROOT
             try:
-                c=t.read_text(errors='replace')
-                s._j(200,{'content':c,'path':rel,'lines':c.count(chr(10))+1})
-            except Exception as e: s._j(500,{'error':str(e)})
+                t.relative_to(ROOT)
+            except ValueError:
+                return s._j(403, {'error':'path traversal blocked'})
+            # Extension allowlist
+            if t.suffix.lower() not in ALLOWED_EXTS:
+                return s._j(403, {'error':'file type not allowed'})
+            if not t.is_file(): return s._j(404, {'error':'not found'})
+            # Size limit
+            if t.stat().st_size > MAX_FILE:
+                return s._j(413, {'error':'file too large (>1MB)'})
+            try:
+                c = t.read_text(errors='replace')
+                s._j(200, {'content': c, 'path': rel, 'lines': c.count(chr(10))+1})
+            except Exception as e: s._j(500, {'error': str(e)})
         else: super().do_GET()
-    def _j(s,st,d):
-        b=json.dumps(d,ensure_ascii=False).encode()
-        s.send_response(st);s.send_header('Content-Type','application/json');s.send_header('Content-Length',str(len(b)));s.end_headers();s.wfile.write(b)
-    def log_message(s,f,*a):
-        if '/api/' in (a[0] if a else ''): super().log_message(f,*a)
+    def _j(s, st, d):
+        b = json.dumps(d, ensure_ascii=False).encode()
+        s.send_response(st)
+        s.send_header('Content-Type','application/json; charset=utf-8')
+        s.send_header('Content-Length', str(len(b)))
+        s.send_header('X-Content-Type-Options','nosniff')
+        s.end_headers()
+        s.wfile.write(b)
+    def log_message(s, f, *a):
+        if '/api/' in (a[0] if a else ''): super().log_message(f, *a)
 
-print('Code Wiki: http://localhost:8080');
-import webbrowser; webbrowser.open('http://localhost:8080')
-http.server.HTTPServer(('',8080),H).serve_forever()
+print('Code Wiki: http://127.0.0.1:8080  (loopback only)')
+import webbrowser; webbrowser.open('http://127.0.0.1:8080')
+# Bind to loopback only — never accessible from other machines on the network
+http.server.HTTPServer(('127.0.0.1', 8080), H).serve_forever()
 " &
 ```
 

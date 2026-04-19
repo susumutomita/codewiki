@@ -178,6 +178,18 @@ Existing static analyzers (SonarQube, CodeScene, Sourcegraph) give you **numbers
 
 *The integration is where the defensibility lives.*
 
+## Security
+
+codewiki runs **locally** on a developer's machine. The local wiki server:
+
+- Binds to `127.0.0.1` only (not reachable from other machines)
+- Checks `Origin` header (rejects cross-origin requests)
+- Enforces path-traversal protection + file-extension allowlist on reads
+- Invokes `claude -p` via argv list (no shell, no injection)
+- **Never auto-installs packages** (`npx --yes` is explicitly avoided to prevent supply-chain risk). Analyzers are only invoked when pre-installed, checked via `command -v`
+
+See [SECURITY.md](SECURITY.md) for full threat model.
+
 ## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
