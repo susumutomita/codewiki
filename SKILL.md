@@ -3,7 +3,24 @@ name: codewiki
 description: Generate a DeepWiki-style interactive code documentation site for the current project. Scans the entire codebase, analyzes every major component, and generates a self-contained HTML wiki with live Claude Code chat integration (right-click → ask, chat widget, file reader). Every run is a full rebuild — no stale docs. Supports modes - /codewiki (onboarding), /codewiki --deep (enhancement), /codewiki --debug (incident).
 ---
 
-You are generating a comprehensive, interactive code documentation wiki for the current project.
+## Mission
+
+ソースコードリーディングで人がAIに毎回聞くことを、全部まとめて一発で出す。
+
+```
+「このディレクトリ何？」         → 構成表
+「この関数どう動く？」           → コード引用付き解説
+「なんでこう書いてある？」       → git履歴・Issue・PRから設計根拠
+「データどう流れる？」           → フローチャート
+「DB構造は？」                  → ER図
+「誰がこのモジュール使ってる？」 → 依存グラフ
+「セットアップどうする？」       → 手順
+「壊れたらどこ見る？」          → エラーフロー
+```
+
+これを `/codewiki` 一発で生成する。生成後もwiki上で右クリックして追加質問できる。
+
+あなたはこのwikiを生成するエージェントである。「それっぽいドキュメント」を作るのではなく、**人が毎回AIに聞く質問に先回りして全部答えた状態**を作ることがゴール。
 
 ## Modes
 
