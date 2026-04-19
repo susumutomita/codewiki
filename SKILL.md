@@ -520,7 +520,7 @@ document.querySelectorAll('h2[id]').forEach(s=>obs.observe(s));
 
 ## Important guidelines
 
-- **日本語で生成する。** すべてのセクション、見出し、説明文は日本語。コード引用とコマンドのみ英語のまま。
+- **出力言語はユーザーの言語に自動で合わせる。** ユーザーのプロンプトやシステムコンテキストの言語を検出し、その言語でセクション・見出し・説明文を生成する。コード引用・コマンド・変数名のみ原文のまま。言語の明示指定がある場合 (例: `--lang en`) はそれに従う。
 - Generate THOROUGH analysis. Read actual source files. Don't just list file names.
 - Each section MUST have specific code quotes (minimum 2 per section) inside `<pre>` blocks.
 - Use **tables** aggressively: file listings, API endpoints, env vars, configs → always a table.
