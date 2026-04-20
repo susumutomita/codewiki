@@ -2,6 +2,10 @@
   "name": "codewiki",
   "version": "1.0.0",
   "description": "Democratize AI-assisted code reading. A Claude Code skill that encodes senior-level investigation techniques (git log, grep, ctags, gh) into one command.",
+  "scripts": {
+    "refresh-sample": "node scripts/refresh-sample.js",
+    "validate": "node scripts/validate.js"
+  },
   "keywords": [
     "claude-code",
     "claude-code-skill",

@@ -195,6 +195,34 @@ See [SECURITY.md](SECURITY.md) for full threat model.
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
 - Python 3.8+ (for the local wiki server)
 
+## Maintainer Quality Gates
+
+Before shipping changes to the skill itself, run:
+
+```bash
+npm run refresh-sample
+npm run validate
+```
+
+What these checks enforce:
+
+- `SKILL.md` has the required frontmatter and core sections
+- `agents/openai.yaml` exists and stays aligned with the skill
+- `.codewiki/index.html` is refreshed against the current repo state
+- package metadata, `.gitignore`, and CI wiring stay intact
+
+CI runs the same validation on every push and pull request via `.github/workflows/validate.yml`.
+
+## What Gets This To 90/100
+
+The repo now has the minimum quality gates it was missing: local validation, sample sync, CI, and UI metadata. The remaining work to get from "good skill" to "finished product" is mostly operational:
+
+- Run repeatable smoke tests against real target repos in each supported ecosystem (TS, Python, Go, Rust)
+- Capture and fix weak spots in generated output quality, especially section depth and diagram correctness
+- Split the growing `SKILL.md` into `references/` so the core skill stays lean
+- Add a release checklist or automated release flow for publishing updates intentionally
+- Keep the generated sample wiki refreshed whenever the skill structure or docs change
+
 ## Output
 
 Generated docs go to `.codewiki/index.html`. Add `.codewiki/` to your `.gitignore`.

@@ -1,0 +1,8 @@
+interface:
+  display_name: "codewiki"
+  short_description: "Generate an interactive codebase wiki."
+  brand_color: "#5E4AE3"
+  default_prompt: "Use $codewiki to generate a DeepWiki-style interactive wiki for this repository."
+
+policy:
+  allow_implicit_invocation: true
